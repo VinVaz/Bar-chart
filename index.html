@@ -3,15 +3,15 @@
    <head>
       <script type = "text/javascript" src = "https://d3js.org/d3.v4.min.js"></script>
       <style>
-         svg rect { 
-		   fill: steelblue; 
-		 }
 		   
 		  svg text {
             fill: purple;
             font: 12px sans-serif;
             text-anchor: end;
          }
+		 .title{
+		  fill: black;
+		 }
       </style>
    </head>
 
@@ -35,6 +35,13 @@
 			.style("fill", "white")
 			.style("stroke", "black")
 			.style("stroke-width", 1);
+		
+		var textArea = body.append("g")
+		    .attr("transform", "translate(445, 20)");
+            
+			textArea.append("text")
+		    .text("Gross Domestic Product")
+            .attr("class", "title")			
 		////////////////////////////////////////////////////////////////  			
         var graph = body.append("g")
 		    .attr("transform", "translate(20, 20)");
@@ -45,7 +52,21 @@
 			.append("g")
 			.attr("transform", function(d, i){
 			  return "translate(" + i * barWidth + "," + (height - d*scaleFactor) + ")";
-			});
+			})
+			
+		//adds dynamic color to the bars
+		bar.attr("fill", "steelblue")
+			.attr("id", function(d, i){
+			  return i;
+			})
+			.on("mouseover", function(){
+			  d3.select(this)
+			    .attr("fill", "#B4CCE1")
+			})
+			.on("mouseout", function(d, i){
+			  d3.select(this)
+			    .attr("fill", "steelblue")
+			})
 		
 		bar.append("rect")
            .attr("height", function(d){
