@@ -18,7 +18,7 @@
    <body>
       <script language = "javascript">
 	    var data = [4, 8, 15, 16, 23, 42];
-		var height = 420,
+		var barHeight = 420,
      		scaleFactor = 10,
 			barWidth = 20;
 			
@@ -39,7 +39,7 @@
 		var textArea = body.append("g")
 		    .attr("transform", "translate(445, 20)");
             
-			textArea.append("text")
+		textArea.append("text")
 		    .text("Gross Domestic Product")
             .attr("class", "title")			
 		////////////////////////////////////////////////////////////////  			
@@ -51,7 +51,7 @@
 			.enter()
 			.append("g")
 			.attr("transform", function(d, i){
-			  return "translate(" + i * barWidth + "," + (height - d*scaleFactor) + ")";
+			  return "translate(" + i * barWidth + "," + (barHeight - d*scaleFactor) + ")";
 			})
 			
 		//adds dynamic color to the bars
@@ -67,6 +67,23 @@
 			  d3.select(this)
 			    .attr("fill", "steelblue")
 			})
+		
+		var chartInfo = body.append("g")
+		    .attr("transform", "translate(445, 200)")
+            
+		chartInfo.append("rect")
+			.attr("height", 50)
+			.attr("width", 150)
+			.attr("rx", 5)
+			.attr("ry", 5)
+			.style("fill", "#B4CCE1")
+			
+	    chartInfo.append("text")
+			.text("hfghgf billion")
+            .attr("x", 100)
+            .attr("y", 25)			
+            .attr("fill", "#FEFEFE")
+			
 		
 		bar.append("rect")
            .attr("height", function(d){
@@ -89,7 +106,7 @@
 		
 		var yscale = d3.scaleLinear()
            .domain([0, d3.max(data)])
-           .range([height, 0]);
+           .range([barHeight, 0]);
 		  
 		var x_axis = d3.axisBottom()
             .scale(xscale);
@@ -101,7 +118,7 @@
             .attr("transform", "translate(0, 0)")
             .call(y_axis);
 			
-        var xAxisTranslate = height;		
+        var xAxisTranslate = barHeight;		
 		
 		axisContainer.append("g")
             .attr("transform", "translate(0, " + xAxisTranslate + ")")
