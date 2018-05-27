@@ -6,11 +6,12 @@
          svg rect { 
 		   fill: steelblue; 
 		 }
-		 svg text{
-		   fill: white;
-		   font: 10px sans-serif;
-		   text-anchor: end;
-		 }
+		   
+		  svg text {
+            fill: purple;
+            font: 12px sans-serif;
+            text-anchor: end;
+         }
       </style>
    </head>
 
@@ -20,12 +21,24 @@
 		var height = 420,
      		scaleFactor = 10,
 			barWidth = 20;
-
-		var graph = d3.select("body")
-            .append("svg")
-            .attr("height", height)
-            .attr("width", barWidth * data.length);
-         
+			
+        var body = d3.select("body")
+		    .append("svg")
+			.attr("height", 550)
+            .attr("width", 900);
+		
+		var frame = body.append("rect")
+			.attr("x", 5)
+			.attr("y", 5)
+			.attr("width", 890)
+			.attr("height", 540)
+			.style("fill", "white")
+			.style("stroke", "black")
+			.style("stroke-width", 1);
+		////////////////////////////////////////////////////////////////  			
+        var graph = body.append("g")
+		    .attr("transform", "translate(20, 20)");
+			
 		var bar = graph.selectAll("g")
 		    .data(data)
 			.enter()
@@ -45,6 +58,34 @@
 		   .attr("x", barWidth / 2)
 		   .attr("dx", ".35em") 
 		   .text(function(d){ return d; });
+		////////////////////////////////////////////////////////////////  
+		var axisContainer = body.append("g")
+		.attr("transform", "translate(20, 20)")
+            	
+		var xscale = d3.scaleLinear()
+		    .domain([0, d3.max(data)])
+			.range([0, barWidth * data.length]);
+		
+		var yscale = d3.scaleLinear()
+           .domain([0, d3.max(data)])
+           .range([height, 0]);
+		  
+		var x_axis = d3.axisBottom()
+            .scale(xscale);
+			
+        var y_axis = d3.axisRight()
+            .scale(yscale);
+			
+		axisContainer.append("g")
+            .attr("transform", "translate(0, 0)")
+            .call(y_axis);
+			
+        var xAxisTranslate = height;		
+		
+		axisContainer.append("g")
+            .attr("transform", "translate(0, " + xAxisTranslate + ")")
+            .call(x_axis)
+		
       </script>
    </body>
 </html>
