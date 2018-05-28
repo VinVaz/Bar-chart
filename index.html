@@ -12,7 +12,6 @@
 
    <body>
       <script language = "javascript">
-	    var data = [4, 8, 15, 16, 23, 42];
 		var svgWidth = 900,
 			svgHeight = 550;
 		var frameMargin = {top: 10, right: 10, bottom: 10, left: 10},
@@ -21,11 +20,15 @@
             frameHeight = svgHeight - frameMargin.top - frameMargin.bottom;	
         var graphWidth = frameWidth - graphMargin.left - graphMargin.right,
             graphHeight = frameHeight - graphMargin.top - graphMargin.bottom;
-	    var barHeight = graphHeight, barWidth = 20;
+	    var barHeight = graphHeight, barWidth = 2;
 	   
-	    var x = d3.scaleLinear()
-          .domain([0, d3.max(data)])
-          .range([0, barHeight]);
+	   d3.json("https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json", function(error, res) {
+            if (error) {
+               throw error;
+            }
+		  var myData = res.data.map(function(val){return val[1]});
+		  receivedData(myData)
+        });
 
  	    var svg = d3.select("body")
 		    .append("svg")
@@ -42,99 +45,105 @@
 			.style("stroke", "black")
 			.style("stroke-width", 1);
 		
-		var textArea = frame.append("g")
-		    .attr("transform", "translate("+frameWidth/2 +", 20)");
+		var titleArea = frame.append("g")
+		    .attr("transform", "translate("+frameWidth/2 +", 30)");
             
-		textArea.append("text")
+		titleArea.append("text")
 		    .text("Gross Domestic Product")
-            .attr("class", "title")			
-		////////////////////////////////////////////////////////////////  			
-        var graph = frame.append("g")
-		    .attr("transform", "translate("+graphMargin.left+","+graphMargin.top+")");
-			
-		var bar = graph.selectAll("g")
-		    .data(data)
-			.enter()
-			.append("g")
-			.attr("transform", function(d, i){
-			  return "translate(" + i * barWidth + "," + (barHeight - x(d)) + ")";
-			})
-			
-		bar.attr("fill", "steelblue")
-			.attr("id", function(d, i){
-			  return i;
-			})
-			.on("mouseover", handleOnMouseOver)
-			.on("mouseout", handleMouseOut)
-			
-		bar.append("rect")
-           .attr("height", function(d){
-		     return x(d);
-		   })	
-           .attr("width", barWidth);		   
-	    
-		var chartInfo = bar.append("g")   
-			
-		function handleOnMouseOver(d, i){
-		  d3.select(this).attr("fill", "#B4CCE1")
+            .attr("class", "title")	
+            .attr("text-anchor", "middle")			
 		
-		  var coords = d3.mouse(this);
-		  var chartInfo = graph.append("g")
-		    .attr("id", "value"+d+"OfIndex"+i)
-			.attr(
-			  "transform", 
-			  "translate("+((i+1.5) * barWidth)+","+(coords[1]+(barHeight - x(d))-60)+")"
-			);
-          var chartInfoHeight = 50;
-		  chartInfo.append("rect")
-			.attr("height", chartInfoHeight)
-			.attr("width", 150)
-			.attr("rx", 5)
-			.attr("ry", 5)
-			.style("fill", "#B4CCE1")
+        receivedData = (data) => {
+		 
+			   var x = d3.scaleLinear()
+			  .domain([0, d3.max(data)])
+			  .range([0, barHeight]);		
+			var graph = frame.append("g")
+				.attr("transform", "translate("+graphMargin.left+","+graphMargin.top+")");
+				
+			var bar = graph.selectAll("g")
+				.data(data)
+				.enter()
+				.append("g")
+				.attr("transform", function(d, i){
+				  return "translate(" + i * barWidth + "," + (barHeight - x(d)) + ")";
+				})
+			function handleOnMouseOver(d, i){
+			  d3.select(this).attr("fill", "#B4CCE1")
 			
-	    var info1 = chartInfo.append("text")
-			.text(function(){ return d;})
-            .attr("x", 10)	
-			.attr("y", chartInfoHeight*0.4)	
-            .attr("fill", "#FEFEFE")
+			  var coords = d3.mouse(this);
+			  var chartInfo = graph.append("g")
+				.attr("id", "value"+"OfIndex"+i)
+				.attr(
+				  "transform", 
+				  "translate("+((i+1.5) * barWidth)+","+(coords[1]+(barHeight - x(d))-60)+")"
+				);
+				console.log("valueOfIndex"+i)
+			  var chartInfoHeight = 50;
+			  chartInfo.append("rect")
+				.attr("height", chartInfoHeight)
+				.attr("width", 150)
+				.attr("rx", 5)
+				.attr("ry", 5)
+				.style("fill", "#B4CCE1")
+				
+			  chartInfo.append("text")
+				.text(function(){ return "$"+d +" Billion";})
+				.attr("x", 10)	
+				.attr("y", chartInfoHeight*0.4)	
+				.attr("fill", "#000")
+				
+			  chartInfo.append("text")
+				.text(function(){ return d;})
+				.attr("x", 10)	
+				.attr("y", chartInfoHeight*0.8)	
+				.attr("fill", "#000")
+			}
 			
-		var info2 = chartInfo.append("text")
-			.text(function(){ return d;})
-            .attr("x", 10)	
-			.attr("y", chartInfoHeight*0.8)	
-            .attr("fill", "#FEFEFE")
+			function handleMouseOut(d, i) {
+			  d3.select(this).attr("fill", "steelBlue")
+			  d3.select("#valueOfIndex"+i).remove();
+			}
+			
+			bar.attr("fill", "steelblue")
+				.attr("id", function(d, i){
+				  return i;
+				})
+				.on("mouseover", handleOnMouseOver)
+				.on("mouseout", handleMouseOut)
+				
+			bar.append("rect")
+			   .attr("height", function(d){
+				 return x(d);
+			   })	
+			   .attr("width", barWidth);		   
+			
+			var chartInfo = bar.append("g")   
+			var xscale = d3.scaleLinear()
+				.domain([0, d3.max(data)])
+				.range([0, barWidth * data.length]);
+			
+			var yscale = d3.scaleLinear()
+			   .domain([0, d3.max(data)])
+			   .range([barHeight, 0]);
+			  
+			var x_axis = d3.axisBottom()
+				.scale(xscale);
+				
+			var y_axis = d3.axisLeft()
+				.scale(yscale);
+			
+			var axisContainer = graph.append("g")	
+			
+			axisContainer.append("g")
+				.attr("transform", "translate(0, 0)")
+				.call(y_axis);
+				
+			var xAxisTranslate = barHeight;		
+			axisContainer.append("g")
+				.attr("transform", "translate(0, " + xAxisTranslate + ")")
+				.call(x_axis)
 		}
-		function handleMouseOut(d, i) {
-		  d3.select(this).attr("fill", "steelBlue")
-		  d3.select("#value"+d+"OfIndex"+i).remove();
-		}
-		////////////////////////////////////////////////////////////////  
-		var xscale = d3.scaleLinear()
-		    .domain([0, d3.max(data)])
-			.range([0, barWidth * data.length]);
-		
-		var yscale = d3.scaleLinear()
-           .domain([0, d3.max(data)])
-           .range([barHeight, 0]);
-		  
-		var x_axis = d3.axisBottom()
-            .scale(xscale);
-			
-        var y_axis = d3.axisLeft()
-            .scale(yscale);
-		
-		var axisContainer = graph.append("g")	
-		
-		axisContainer.append("g")
-            .attr("transform", "translate(0, 0)")
-            .call(y_axis);
-			
-        var xAxisTranslate = barHeight;		
-		axisContainer.append("g")
-            .attr("transform", "translate(0, " + xAxisTranslate + ")")
-            .call(x_axis)
-		
       </script>
    </body>
 </html>
