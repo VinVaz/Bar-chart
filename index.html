@@ -26,8 +26,8 @@
             if (error) {
                throw error;
             }
-		  var myData = res.data.map(function(val){return val[1]});
-		  receivedData(myData)
+		  var data = res.data;
+		  receivedResponse(data);
         });
 
  	    var svg = d3.select("body")
@@ -53,20 +53,22 @@
             .attr("class", "title")	
             .attr("text-anchor", "middle")			
 		
-        receivedData = (data) => {
-		 
-			   var x = d3.scaleLinear()
+        receivedResponse = (res) => {
+		  var data = res.map(function(val){return val[1]});
+		  var years = res.map(function(val){return new Date(val[0]).getFullYear()});
+
+			   var y = d3.scaleLinear()
 			  .domain([0, d3.max(data)])
 			  .range([0, barHeight]);		
 			var graph = frame.append("g")
 				.attr("transform", "translate("+graphMargin.left+","+graphMargin.top+")");
 				
 			var bar = graph.selectAll("g")
-				.data(data)
+				.data(res)
 				.enter()
 				.append("g")
 				.attr("transform", function(d, i){
-				  return "translate(" + i * barWidth + "," + (barHeight - x(d)) + ")";
+				  return "translate(" + i * barWidth + "," + (barHeight - y(d[1])) + ")";
 				})
 			function handleOnMouseOver(d, i){
 			  d3.select(this).attr("fill", "#B4CCE1")
@@ -76,9 +78,9 @@
 				.attr("id", "value"+"OfIndex"+i)
 				.attr(
 				  "transform", 
-				  "translate("+((i+1.5) * barWidth)+","+(coords[1]+(barHeight - x(d))-60)+")"
+				  "translate("+((i+1.5) * barWidth)+","+(coords[1]+(barHeight - y(d[1]))-60)+")"
 				);
-				console.log("valueOfIndex"+i)
+
 			  var chartInfoHeight = 50;
 			  chartInfo.append("rect")
 				.attr("height", chartInfoHeight)
@@ -88,13 +90,13 @@
 				.style("fill", "#B4CCE1")
 				
 			  chartInfo.append("text")
-				.text(function(){ return "$"+d +" Billion";})
+				.text(function(){ return "$"+d[1] +" Billion";})
 				.attr("x", 10)	
 				.attr("y", chartInfoHeight*0.4)	
 				.attr("fill", "#000")
 				
 			  chartInfo.append("text")
-				.text(function(){ return d;})
+				.text(function(){ return d[0];})
 				.attr("x", 10)	
 				.attr("y", chartInfoHeight*0.8)	
 				.attr("fill", "#000")
@@ -114,15 +116,15 @@
 				
 			bar.append("rect")
 			   .attr("height", function(d){
-				 return x(d);
+				 return y(d[1]);
 			   })	
 			   .attr("width", barWidth);		   
-			
+
 			var chartInfo = bar.append("g")   
 			var xscale = d3.scaleLinear()
-				.domain([0, d3.max(data)])
-				.range([0, barWidth * data.length]);
-			
+				.domain([d3.max(years), 0])
+				.range([barWidth * years.length, 0]);
+			console.log(years)
 			var yscale = d3.scaleLinear()
 			   .domain([0, d3.max(data)])
 			   .range([barHeight, 0]);
