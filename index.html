@@ -120,11 +120,11 @@
 			   })	
 			   .attr("width", barWidth);		   
 
-			var chartInfo = bar.append("g")   
+		   
 			var xscale = d3.scaleLinear()
-				.domain([d3.max(years), 0])
-				.range([barWidth * years.length, 0]);
-			console.log(years)
+				.domain([d3.min(years), d3.max(years)])
+				.range([0, barWidth * years.length]);
+			
 			var yscale = d3.scaleLinear()
 			   .domain([0, d3.max(data)])
 			   .range([barHeight, 0]);
