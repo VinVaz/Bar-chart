@@ -3,12 +3,7 @@
    <head>
       <script type = "text/javascript" src = "https://d3js.org/d3.v4.min.js"></script>
       <style>
-		   
-		  svg text {
-            fill: purple;
-            font: 12px sans-serif;
-            text-anchor: end;
-         }
+		 
 		 .title{
 		  fill: black;
 		 }
@@ -18,43 +13,53 @@
    <body>
       <script language = "javascript">
 	    var data = [4, 8, 15, 16, 23, 42];
-		var barHeight = 420,
-     		scaleFactor = 10,
-			barWidth = 20;
-			
-        var body = d3.select("body")
+		var svgWidth = 900,
+			svgHeight = 550;
+		var frameMargin = {top: 10, right: 10, bottom: 10, left: 10},
+            graphMargin = {top: 50, right: 50, bottom: 50, left: 50};
+        var frameWidth = svgWidth - frameMargin.left - frameMargin.right,
+            frameHeight = svgHeight - frameMargin.top - frameMargin.bottom;	
+        var graphWidth = frameWidth - graphMargin.left - graphMargin.right,
+            graphHeight = frameHeight - graphMargin.top - graphMargin.bottom;
+	    var barHeight = graphHeight, barWidth = 20;
+	   
+	    var x = d3.scaleLinear()
+          .domain([0, d3.max(data)])
+          .range([0, barHeight]);
+
+ 	    var svg = d3.select("body")
 		    .append("svg")
-			.attr("height", 550)
-            .attr("width", 900);
+			.attr("height", svgHeight)
+            .attr("width", svgWidth);
 		
-		var frame = body.append("rect")
-			.attr("x", 5)
-			.attr("y", 5)
-			.attr("width", 890)
-			.attr("height", 540)
+		var frame = svg.append("g")
+		    .attr("transform", "translate("+frameMargin.left+","+frameMargin.right+")");
+		    
+		frame.append("rect")
+			.attr("width", frameWidth)
+			.attr("height", frameHeight)
 			.style("fill", "white")
 			.style("stroke", "black")
 			.style("stroke-width", 1);
 		
-		var textArea = body.append("g")
-		    .attr("transform", "translate(445, 20)");
+		var textArea = frame.append("g")
+		    .attr("transform", "translate("+frameWidth/2 +", 20)");
             
 		textArea.append("text")
 		    .text("Gross Domestic Product")
             .attr("class", "title")			
 		////////////////////////////////////////////////////////////////  			
-        var graph = body.append("g")
-		    .attr("transform", "translate(20, 20)");
+        var graph = frame.append("g")
+		    .attr("transform", "translate("+graphMargin.left+","+graphMargin.top+")");
 			
 		var bar = graph.selectAll("g")
 		    .data(data)
 			.enter()
 			.append("g")
 			.attr("transform", function(d, i){
-			  return "translate(" + i * barWidth + "," + (barHeight - d*scaleFactor) + ")";
+			  return "translate(" + i * barWidth + "," + (barHeight - x(d)) + ")";
 			})
 			
-		//adds dynamic color to the bars
 		bar.attr("fill", "steelblue")
 			.attr("id", function(d, i){
 			  return i;
@@ -64,38 +69,40 @@
 			
 		bar.append("rect")
            .attr("height", function(d){
-		     return d * scaleFactor;
+		     return x(d);
 		   })	
-           .attr("width", barWidth - 1);		   
+           .attr("width", barWidth);		   
 	    
-		bar.append("text")
-		   .attr("y", 12)
-		   .attr("x", barWidth / 2)
-		   .attr("dx", ".35em") 
-		   .text(function(d){ return d; });
 		var chartInfo = bar.append("g")   
 			
 		function handleOnMouseOver(d, i){
 		  d3.select(this).attr("fill", "#B4CCE1")
 		
-		var coords = d3.mouse(this);
-		var chartInfo = graph.append("g")
+		  var coords = d3.mouse(this);
+		  var chartInfo = graph.append("g")
 		    .attr("id", "value"+d+"OfIndex"+i)
-
-		   chartInfo.append("rect")
-			.attr("height", 50)
-			.attr("width", 150)
-			.attr("x", (i+1) * barWidth)
-			.attr("y", (coords[1] + (barHeight - d*scaleFactor)))
+			.attr(
+			  "transform", 
+			  "translate("+((i+1.5) * barWidth)+","+(coords[1]+(barHeight - x(d))-60)+")"
+			);
+          var chartInfoHeight = 50;
+		  chartInfo.append("rect")
+			.attr("height", chartInfoHeight)
 			.attr("width", 150)
 			.attr("rx", 5)
 			.attr("ry", 5)
 			.style("fill", "#B4CCE1")
 			
-	      chartInfo.append("text")
+	    var info1 = chartInfo.append("text")
 			.text(function(){ return d;})
-            .attr("x", (i+1) * barWidth + 20)
-			.attr("y", (coords[1] + (barHeight - d*scaleFactor) + 25))		
+            .attr("x", 10)	
+			.attr("y", chartInfoHeight*0.4)	
+            .attr("fill", "#FEFEFE")
+			
+		var info2 = chartInfo.append("text")
+			.text(function(){ return d;})
+            .attr("x", 10)	
+			.attr("y", chartInfoHeight*0.8)	
             .attr("fill", "#FEFEFE")
 		}
 		function handleMouseOut(d, i) {
@@ -103,9 +110,6 @@
 		  d3.select("#value"+d+"OfIndex"+i).remove();
 		}
 		////////////////////////////////////////////////////////////////  
-		var axisContainer = body.append("g")
-		.attr("transform", "translate(20, 20)")
-            	
 		var xscale = d3.scaleLinear()
 		    .domain([0, d3.max(data)])
 			.range([0, barWidth * data.length]);
@@ -117,15 +121,16 @@
 		var x_axis = d3.axisBottom()
             .scale(xscale);
 			
-        var y_axis = d3.axisRight()
+        var y_axis = d3.axisLeft()
             .scale(yscale);
-			
+		
+		var axisContainer = graph.append("g")	
+		
 		axisContainer.append("g")
             .attr("transform", "translate(0, 0)")
             .call(y_axis);
 			
         var xAxisTranslate = barHeight;		
-		
 		axisContainer.append("g")
             .attr("transform", "translate(0, " + xAxisTranslate + ")")
             .call(x_axis)
