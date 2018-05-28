@@ -59,32 +59,9 @@
 			.attr("id", function(d, i){
 			  return i;
 			})
-			.on("mouseover", function(){
-			  d3.select(this)
-			    .attr("fill", "#B4CCE1")
-			})
-			.on("mouseout", function(d, i){
-			  d3.select(this)
-			    .attr("fill", "steelblue")
-			})
-		
-		var chartInfo = body.append("g")
-		    .attr("transform", "translate(445, 200)")
-            
-		chartInfo.append("rect")
-			.attr("height", 50)
-			.attr("width", 150)
-			.attr("rx", 5)
-			.attr("ry", 5)
-			.style("fill", "#B4CCE1")
+			.on("mouseover", handleOnMouseOver)
+			.on("mouseout", handleMouseOut)
 			
-	    chartInfo.append("text")
-			.text("hfghgf billion")
-            .attr("x", 100)
-            .attr("y", 25)			
-            .attr("fill", "#FEFEFE")
-			
-		
 		bar.append("rect")
            .attr("height", function(d){
 		     return d * scaleFactor;
@@ -96,6 +73,35 @@
 		   .attr("x", barWidth / 2)
 		   .attr("dx", ".35em") 
 		   .text(function(d){ return d; });
+		var chartInfo = bar.append("g")   
+			
+		function handleOnMouseOver(d, i){
+		  d3.select(this).attr("fill", "#B4CCE1")
+		
+		var coords = d3.mouse(this);
+		var chartInfo = graph.append("g")
+		    .attr("id", "value"+d+"OfIndex"+i)
+
+		   chartInfo.append("rect")
+			.attr("height", 50)
+			.attr("width", 150)
+			.attr("x", (i+1) * barWidth)
+			.attr("y", (coords[1] + (barHeight - d*scaleFactor)))
+			.attr("width", 150)
+			.attr("rx", 5)
+			.attr("ry", 5)
+			.style("fill", "#B4CCE1")
+			
+	      chartInfo.append("text")
+			.text(function(){ return d;})
+            .attr("x", (i+1) * barWidth + 20)
+			.attr("y", (coords[1] + (barHeight - d*scaleFactor) + 25))		
+            .attr("fill", "#FEFEFE")
+		}
+		function handleMouseOut(d, i) {
+		  d3.select(this).attr("fill", "steelBlue")
+		  d3.select("#value"+d+"OfIndex"+i).remove();
+		}
 		////////////////////////////////////////////////////////////////  
 		var axisContainer = body.append("g")
 		.attr("transform", "translate(20, 20)")
