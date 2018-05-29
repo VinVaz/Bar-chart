@@ -3,7 +3,13 @@
    <head>
       <script type = "text/javascript" src = "https://d3js.org/d3.v4.min.js"></script>
       <style>
-		 
+		 .chartInfo1{
+		   font-weight: 600;
+		   font-size: 16px;
+		 }
+		 .chartInfo2{
+		   font-size: 14px;
+		 }
 		 .title{
 		  fill: black;
 		 }
@@ -15,7 +21,7 @@
 		var svgWidth = 900,
 			svgHeight = 550;
 		var frameMargin = {top: 10, right: 10, bottom: 10, left: 10},
-            graphMargin = {top: 50, right: 50, bottom: 50, left: 50};
+            graphMargin = {top: 50, right: 150, bottom: 50, left: 150};
         var frameWidth = svgWidth - frameMargin.left - frameMargin.right,
             frameHeight = svgHeight - frameMargin.top - frameMargin.bottom;	
         var graphWidth = frameWidth - graphMargin.left - graphMargin.right,
@@ -53,7 +59,8 @@
             .attr("class", "title")	
             .attr("text-anchor", "middle")			
 		
-        receivedResponse = (res) => {
+        function receivedResponse(res){
+		
 		  var data = res.map(function(val){return val[1]});
 		  var years = res.map(function(val){return new Date(val[0]).getFullYear()});
 
@@ -88,18 +95,19 @@
 				.attr("rx", 5)
 				.attr("ry", 5)
 				.style("fill", "#B4CCE1")
+				.style("opacity", "0.9")
 				
 			  chartInfo.append("text")
 				.text(function(){ return "$"+d[1] +" Billion";})
 				.attr("x", 10)	
 				.attr("y", chartInfoHeight*0.4)	
-				.attr("fill", "#000")
+				.attr("class", "chartInfo1")
 				
 			  chartInfo.append("text")
 				.text(function(){ return d[0];})
 				.attr("x", 10)	
 				.attr("y", chartInfoHeight*0.8)	
-				.attr("fill", "#000")
+				.attr("class", "chartInfo2")
 			}
 			
 			function handleMouseOut(d, i) {
@@ -120,7 +128,7 @@
 			   })	
 			   .attr("width", barWidth);		   
 
-		   
+		    console.log(years)
 			var xscale = d3.scaleLinear()
 				.domain([d3.min(years), d3.max(years)])
 				.range([0, barWidth * years.length]);
@@ -130,10 +138,12 @@
 			   .range([barHeight, 0]);
 			  
 			var x_axis = d3.axisBottom()
-				.scale(xscale);
+				.scale(xscale)
+				.tickFormat(d3.format(""))
 				
 			var y_axis = d3.axisLeft()
 				.scale(yscale);
+				
 			
 			var axisContainer = graph.append("g")	
 			
